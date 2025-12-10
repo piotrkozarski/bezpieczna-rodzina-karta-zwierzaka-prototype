@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karta Zwierzaka - Prototyp</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-wrapper">
+        <div class="phone-frame">
+            <div class="phone-status-bar">
+                <span>08:38</span>
+                <span>🔋 81%</span>
+            </div>
+            <div class="phone-screen">
+                <div class="map-view">
+                    <div class="geofence-circle"></div>
+                    <div class="tracker-icon">
+                        <div class="tracker-light"></div>
+                    </div>
+                    <button class="settings-button" aria-label="Ustawienia">⚙️</button>
+                </div>
+
+                <div class="location-status">
+                    <div class="location-icon">📍</div>
+                    <div class="location-text">
+                        <p class="location-main">(GPS) Lokalizacja bardzo dokładna</p>
+                        <p class="location-sub">Brak danych zwierzaka · tracker włączony</p>
+                    </div>
+                </div>
+
+                <!-- PANEL KARTY ZWIERZAKA -->
+                <div class="pet-card hidden" id="petCard">
+                    <div class="pet-card-header">
+                        <div>
+                            <h2>Karta zwierzaka</h2>
+                            <p class="pet-card-subtitle" id="petCardSubtitle">Brak danych zwierzaka</p>
+                        </div>
+                        <button class="icon-button" id="closePetCardButton">×</button>
+                    </div>
+
+                    <!-- GŁÓWNY WIDOK KARTY -->
+                    <div class="pet-card-content" id="petCardMainView">
+                        <!-- PUSTY STAN PROFILU -->
+                        <section class="card-section" id="petProfileEmptyState">
+                            <div class="empty-state">
+                                <div class="empty-avatar">🐾</div>
+                                <h3>Brak danych zwierzaka</h3>
+                                <p>Dodaj podstawowe informacje o zwierzaku, aby korzystać ze szczepień i przypomnień.</p>
+                                <button class="primary-button" id="addPetProfileButton">Dodaj dane zwierzaka</button>
+                            </div>
+                        </section>
+
+                        <!-- WYPEŁNIONY PROFIL (początkowo ukryty) -->
+                        <section class="card-section hidden" id="petProfileSection">
+                            <div class="card-section-header">
+                                <h3>Profil zwierzaka</h3>
+                                <button class="text-button" id="editProfileButton">Edytuj</button>
+                            </div>
+                            <div class="pet-profile">
+                                <div class="pet-avatar" id="petAvatar">🐶</div>
+                                <div class="pet-profile-info">
+                                    <div class="pet-name-row">
+                                        <span class="pet-name" id="petNameDisplay">Tosia</span>
+                                        <span class="pet-tag" id="petSpeciesTag">Pies</span>
+                                    </div>
+                                    <div class="pet-details-row">
+                                        <span>Rasa: <strong id="petBreedDisplay">Bokser</strong></span>
+                                        <span>Kolor: <strong id="petColorDisplay">Pręgowany</strong></span>
+                                    </div>
+                                    <div class="pet-details-row">
+                                        <span>Płeć: <strong id="petSexDisplay">Samica</strong></span>
+                                        <span>Waga: <strong id="petWeightDisplay">28 kg</strong></span>
+                                        <span>Wiek: <strong id="petAgeDisplay">8 lat</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- SEKCJA NAJBLIŻSZEGO SZCZEPIENIA (początkowo ukryta) -->
+                        <section class="card-section hidden" id="nextVaccinationSection">
+                            <div class="card-section-header">
+                                <h3>Najbliższe szczepienie</h3>
+                            </div>
+                            <div class="next-vaccination" id="nextVaccinationSummary">
+                                <p>Brak zaplanowanych szczepień.</p>
+                            </div>
+                            <div class="card-section-actions">
+                                <button class="outlined-button" id="openVaccinationHistoryButton">
+                                    Historia szczepień
+                                </button>
+                            </div>
+                        </section>
+
+                        <!-- SEKCJA PRZYPOMNIEŃ (początkowo ukryta) -->
+                        <section class="card-section hidden" id="remindersSection">
+                            <div class="card-section-header">
+                                <h3>Przypomnienia</h3>
+                            </div>
+                            <div class="reminders-list" id="remindersList">
+                                <!-- dynamiczne przypomnienia -->
+                            </div>
+                            <div class="card-section-actions">
+                                <button class="outlined-button" id="scanReminderFromVaccinationButton">
+                                    Dodaj przypomnienie przez skan
+                                </button>
+                                <button class="primary-button ghost" id="addReminderButton">
+                                    Dodaj przypomnienie
+                                </button>
+                            </div>
+                        </section>
+                    </div>
+
+                    <!-- WIDOK: HISTORIA SZCZEPIEŃ -->
+                    <div class="pet-card-content hidden" id="vaccinationHistoryView">
+                        <div class="pet-form-header">
+                            <button class="icon-button" data-back-to="petCardMainView">←</button>
+                            <h3>Historia szczepień</h3>
+                        </div>
+                        <div class="vaccination-list" id="vaccinationList">
+                            <!-- dynamiczne wpisy szczepień -->
+                        </div>
+                        <div class="card-section-actions history-actions">
+                            <button class="outlined-button" id="scanVaccinationButton">Dodaj przez skan</button>
+                            <button class="primary-button" id="addVaccinationButton">Dodaj szczepienie</button>
+                        </div>
+                    </div>
+
+                    <!-- WIDOK: FORMULARZ PROFILU ZWIERZAKA (DODAJ / EDYTUJ) -->
+                    <div class="pet-card-content hidden" id="profileFormView">
+                        <div class="pet-form-header">
+                            <button class="icon-button" data-back-to="petCardMainView">←</button>
+                            <h3 id="profileFormTitle">Dodaj zwierzaka</h3>
+                        </div>
+                        <form class="pet-form" id="profileForm">
+                            <div class="avatar-picker">
+                                <div class="pet-avatar" id="profileFormAvatarPreview">🐶</div>
+                                <button type="button" class="text-button" id="changeAvatarButton">Zmień zdjęcie (symulacja)</button>
+                            </div>
+                            <label class="form-field">
+                                <span class="form-label">Imię</span>
+                                <input type="text" name="name" id="profileNameInput" placeholder="np. Tosia" required />
+                            </label>
+                            <label class="form-field">
+                                <span class="form-label">Gatunek</span>
+                                <select name="species" id="profileSpeciesInput" required>
+                                    <option value="pies">Pies</option>
+                                    <option value="kot">Kot</option>
+                                </select>
+                            </label>
+                            <label class="form-field">
+                                <span class="form-label">Rasa</span>
+                                <input type="text" name="breed" id="profileBreedInput" placeholder="np. Bokser" />
+                            </label>
+                            <label class="form-field">
+                                <span class="form-label">Kolor</span>
+                                <input type="text" name="color" id="profileColorInput" placeholder="np. Pręgowany" />
+                            </label>
+                            <label class="form-field">
+                                <span class="form-label">Płeć</span>
+                                <select name="sex" id="profileSexInput" required>
+                                    <option value="samica">Samica</option>
+                                    <option value="samiec">Samiec</option>
+                                </select>
+                            </label>
+                            <label class="form-field">
+                                <span class="form-label">Waga (kg)</span>
+                                <input type="number" step="0.1" min="0" name="weight" id="profileWeightInput" placeholder="np. 28" />
+                            </label>
+                            <label class="form-field">
+                                <span class="form-label">Wiek (lata)</span>
+                                <input type="number" min="0" name="age" id="profileAgeInput" placeholder="np. 8" />
+                            </label>
+                            <div class="form-actions">
+                                <button type="button" class="outlined-button" data-back-to="petCardMainView">Anuluj</button>
+                                <button type="submit" class="primary-button">Zapisz</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- WIDOK: FORMULARZ DODANIA SZCZEPIENIA -->
+                    <div class="pet-card-content hidden" id="vaccinationFormView">
+                        <div class="pet-form-header">
+                            <button class="icon-button" data-back-to="vaccinationHistoryView">←</button>
+                            <h3>Dodaj szczepienie</h3>
+                        </div>
+                        <form class="pet-form" id="vaccinationForm">
+                            <label class="form-field">
+                                <span class="form-label">Nazwa szczepionki</span>
+                                <input type="text" name="vaccineName" id="vaccineNameInput" placeholder="np. Versiguard" required />
+                            </label>
+                            <label class="form-field">
+                                <span class="form-label">Rodzaj szczepienia</span>
+                                <select name="type" id="vaccineTypeInput" required>
+                                    <option value="wscieklizna">Przeciw wściekliźnie</option>
+                                    <option value="kombinowane">Kombinowane</option>
+                                    <option value="inne">Inne</option>
+                                </select>
+                            </label>
+                            <label class="form-field">
+                                <span class="form-label">Data szczepienia</span>
+                                <input type="date" name="date" id="vaccineDateInput" required />
+                            </label>
+                            <label class="form-field">
+                                <span class="form-label">Data kolejnej dawki</span>
+                                <input type="date" name="nextDate" id="vaccineNextDateInput" required />
+                            </label>
+                            <div class="form-actions">
+                                <button type="button" class="outlined-button" data-back-to="vaccinationHistoryView">Anuluj</button>
+                                <button type="submit" class="primary-button">Zapisz</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- WIDOK: FORMULARZ DODANIA PRZYPOMNIENIA -->
+                    <div class="pet-card-content hidden" id="reminderFormView">
+                        <div class="pet-form-header">
+                            <button class="icon-button" data-back-to="petCardMainView">←</button>
+                            <h3>Dodaj przypomnienie</h3>
+                        </div>
+                        <form class="pet-form" id="reminderForm">
+                            <label class="form-field">
+                                <span class="form-label">Rodzaj przypomnienia</span>
+                                <select name="kind" id="reminderKindInput" required>
+                                    <option value="zwykle">Zwykłe</option>
+                                    <option value="szczepienie">O szczepieniu</option>
+                                    <option value="wizyta">O wizycie u weterynarza</option>
+                                </select>
+                            </label>
+                            <label class="form-field">
+                                <span class="form-label">Tytuł</span>
+                                <input type="text" name="title" id="reminderTitleInput" placeholder="np. Szczepienie przeciw wściekliźnie" required />
+                            </label>
+                            <label class="form-field">
+                                <span class="form-label">Data</span>
+                                <input type="date" name="date" id="reminderDateInput" required />
+                            </label>
+                            <label class="form-field">
+                                <span class="form-label">Godzina</span>
+                                <input type="time" name="time" id="reminderTimeInput" required />
+                            </label>
+                            <div class="form-actions">
+                                <button type="button" class="outlined-button" data-back-to="petCardMainView">Anuluj</button>
+                                <button type="submit" class="primary-button">Zapisz</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- WIDOK: SKANOWANIE DOKUMENTU -->
+                    <div class="pet-card-content hidden" id="scanView">
+                        <div class="pet-form-header">
+                            <button class="icon-button" data-back-to="vaccinationHistoryView">←</button>
+                            <h3>Skanuj dokument</h3>
+                        </div>
+                        <div class="scan-content">
+                            <div class="scan-frame">
+                                <div class="scan-line"></div>
+                                <span class="scan-icon">📷</span>
+                            </div>
+                            <p class="scan-description">
+                                Zeskanuj zaświadczenie od weterynarza. Spróbujemy uzupełnić dane szczepienia oraz dodać przypomnienie o kolejnej dawce.
+                            </p>
+                            <button class="primary-button" id="simulateScanButton">Symuluj skanowanie</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DOLNY PASEK AKCJI -->
+                <div class="action-bar">
+                    <button class="action-button active" id="openPetCardButton">
+                        <span class="action-icon">🐾</span>
+                        <span class="action-label">Karta zwierzaka</span>
+                    </button>
+                    <button class="action-button">
+                        <span class="action-icon">🏠</span>
+                        <span class="action-label">Strefa</span>
+                    </button>
+                    <button class="action-button">
+                        <span class="action-icon">📅</span>
+                        <span class="action-label">Historia</span>
+                    </button>
+                    <button class="action-button">
+                        <span class="action-icon">📍</span>
+                        <span class="action-label">Lokalizuj</span>
+                    </button>
+                    <button class="action-button">
+                        <span class="action-icon">⋯</span>
+                        <span class="action-label">Więcej</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js" defer></script>
+</body>
+</html>
