@@ -908,3 +908,7 @@ body {
 .hidden {
     display: none !important;
 }
+
+.hidden-file-input {
+    display: none;
+}
