@@ -375,6 +375,10 @@ body {
     font-size: 40px;
 }
 
+#profileFormAvatarEmoji {
+    font-size: 28px;
+}
+
 .pet-profile-info {
     flex: 1;
 }

@@ -52,6 +52,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const profileWeightInput = document.getElementById('profileWeightInput');
     const profileAgeInput = document.getElementById('profileAgeInput');
     const profileFormAvatarPreview = document.getElementById('profileFormAvatarPreview');
+    const profileFormAvatarImage = document.getElementById('profileFormAvatarImage');
+    const profileFormAvatarEmoji = document.getElementById('profileFormAvatarEmoji');
     const changeAvatarButton = document.getElementById('changeAvatarButton');
 
     // Przyciski profilowe:
@@ -318,11 +320,19 @@ document.addEventListener('DOMContentLoaded', function() {
             // czyścimy formularz
             profileForm.reset();
             
+            // Reset zdjęcia z photo flow
+            selectedPhotoDataUrl = null;
+            
             // Domyślnie przyjmijmy, że to pies (użytkownik może zmienić)
             profileSpeciesInput.value = "pies";
             profileSexInput.value = "";
-            profileFormAvatarPreview.textContent =
-                profileSpeciesInput.value === "kot" ? "🐱" : "🐶";
+            
+            // Avatar w formularzu - reset do emoji
+            if (profileFormAvatarImage && profileFormAvatarEmoji) {
+                profileFormAvatarImage.classList.add("hidden");
+                profileFormAvatarEmoji.classList.remove("hidden");
+                profileFormAvatarEmoji.textContent = "🐶";
+            }
             
             showView("profileFormView");
         });
@@ -400,6 +410,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const dataUrl = e.target.result;
                 selectedPhotoDataUrl = dataUrl; // ZAPISUJEMY WYBRANE ZDJĘCIE
                 
+                // Podgląd w photo flow
                 if (photoPreviewImage) {
                     photoPreviewImage.src = dataUrl;
                     photoPreviewImage.classList.remove("hidden");
@@ -424,6 +435,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 if (startAiAnalysisButton) {
                     startAiAnalysisButton.disabled = false;
+                }
+
+                // Avatar w formularzu – jeżeli później przejdziemy do profilu, chcemy już to zdjęcie
+                if (profileFormAvatarImage && profileFormAvatarEmoji) {
+                    profileFormAvatarImage.src = dataUrl;
+                    profileFormAvatarImage.classList.remove("hidden");
+                    profileFormAvatarEmoji.classList.add("hidden");
                 }
             };
             reader.readAsDataURL(file);
@@ -484,9 +502,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 profileWeightInput.value = "";
                 profileAgeInput.value = "";
                 
-                // Avatar na podstawie gatunku
-                profileFormAvatarPreview.textContent =
-                    profileSpeciesInput.value === "kot" ? "🐱" : "🐶";
+                // Avatar w formularzu: jeśli mamy zdjęcie z photo flow, pokaż je
+                if (selectedPhotoDataUrl && profileFormAvatarImage && profileFormAvatarEmoji) {
+                    profileFormAvatarImage.src = selectedPhotoDataUrl;
+                    profileFormAvatarImage.classList.remove("hidden");
+                    profileFormAvatarEmoji.classList.add("hidden");
+                } else if (profileFormAvatarImage && profileFormAvatarEmoji) {
+                    // fallback do emoji, gdyby nie było zdjęcia
+                    profileFormAvatarImage.classList.add("hidden");
+                    profileFormAvatarEmoji.classList.remove("hidden");
+                    profileFormAvatarEmoji.textContent =
+                        profileSpeciesInput.value === "kot" ? "🐱" : "🐶";
+                }
                 
                 showView("profileFormView");
             }, 1200);
@@ -508,22 +535,50 @@ document.addEventListener('DOMContentLoaded', function() {
             profileWeightInput.value = petProfile.weight || "";
             profileAgeInput.value = petProfile.age || "";
             
-            profileFormAvatarPreview.textContent =
-                petProfile.species === "kot" ? "🐱" : "🐶";
+            // Avatar w formularzu - pokaż zdjęcie jeśli jest, inaczej emoji
+            if (petProfile.photo && profileFormAvatarImage && profileFormAvatarEmoji) {
+                profileFormAvatarImage.src = petProfile.photo;
+                profileFormAvatarImage.classList.remove("hidden");
+                profileFormAvatarEmoji.classList.add("hidden");
+            } else if (profileFormAvatarImage && profileFormAvatarEmoji) {
+                profileFormAvatarImage.classList.add("hidden");
+                profileFormAvatarEmoji.classList.remove("hidden");
+                profileFormAvatarEmoji.textContent =
+                    petProfile.species === "kot" ? "🐱" : "🐶";
+            }
             
             showView("profileFormView");
         });
     }
 
     changeAvatarButton.addEventListener('click', function() {
-        // Symulacja zmiany zdjęcia - przełącz emoji
-        const currentAvatar = profileFormAvatarPreview.textContent;
-        if (currentAvatar === '🐶') {
-            profileFormAvatarPreview.textContent = '🐱';
-        } else {
-            profileFormAvatarPreview.textContent = '🐶';
+        // Otwórz photo flow aby zmienić zdjęcie
+        console.log("Kliknięto: Zmień zdjęcie (wejście w flow)");
+        selectedPhotoSource = null;
+        selectedPhotoAnalyzed = false;
+        
+        // Reset podglądu
+        if (photoPreviewImage) {
+            photoPreviewImage.src = "";
+            photoPreviewImage.classList.add("hidden");
         }
-        console.log('Symulacja zmiany zdjęcia - zmieniono avatar');
+        if (photoPreviewPlaceholder) {
+            photoPreviewPlaceholder.classList.remove("hidden");
+        }
+        if (photoPreviewText) {
+            photoPreviewText.textContent = "Nie wybrano jeszcze zdjęcia.";
+        }
+        if (photoPreviewMetaText) {
+            photoPreviewMetaText.textContent = "Źródło zdjęcia: brak";
+        }
+        if (photoAiStatusText) {
+            photoAiStatusText.textContent = "Po wybraniu zdjęcia uruchom analizę AI.";
+        }
+        if (startAiAnalysisButton) {
+            startAiAnalysisButton.disabled = true;
+            startAiAnalysisButton.textContent = "Analizuj zdjęcie (AI)";
+        }
+        showView("photoFlowView");
     });
 
     profileForm.addEventListener('submit', function(e) {
