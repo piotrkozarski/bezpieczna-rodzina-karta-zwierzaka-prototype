@@ -1,6 +1,7 @@
 // Stan aplikacji
 let petProfile = null; // null dopóki użytkownik nie doda profilu
 let detectedSpeciesFromScan = null; // np. "pies" po skanowaniu dokumentu
+let selectedPhotoSource = null; // "camera" | "gallery" | null
 let vaccinations = []; // tablica obiektów: { name, type, date, nextDate }
 let reminders = []; // tablica obiektów: { kind, title, date, time }
 
@@ -14,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const petCardMainView = document.getElementById('petCardMainView');
     const vaccinationHistoryView = document.getElementById('vaccinationHistoryView');
     const profileFormView = document.getElementById('profileFormView');
+    const photoFlowView = document.getElementById('photoFlowView');
     const vaccinationFormView = document.getElementById('vaccinationFormView');
     const reminderFormView = document.getElementById('reminderFormView');
     const scanView = document.getElementById('scanView');
@@ -52,6 +54,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const addPetProfileButton = document.getElementById('addPetProfileButton');
     const takePetPhotoButton = document.getElementById('takePetPhotoButton');
     const editProfileButton = document.getElementById('editProfileButton');
+    
+    // Photo flow:
+    const simulateCameraShotButton = document.getElementById('simulateCameraShotButton');
+    const simulateGalleryPickButton = document.getElementById('simulateGalleryPickButton');
+    const startAiAnalysisButton = document.getElementById('startAiAnalysisButton');
+    const photoPreviewText = document.getElementById('photoPreviewText');
+    const photoAiStatusText = document.getElementById('photoAiStatusText');
 
     // Historia szczepień:
     const openVaccinationHistoryButton = document.getElementById('openVaccinationHistoryButton');
@@ -280,20 +289,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Dodawanie / edycja profilu
     if (addPetProfileButton) {
         addPetProfileButton.addEventListener('click', function() {
-            console.log("Kliknięto: Uzupełnij dane zwierzaka (ręcznie)");
+            console.log("Kliknięto: Uzupełnij dane zwierzaka ręcznie");
             profileFormTitle.textContent = "Uzupełnij dane zwierzaka";
             
             // czyścimy formularz
             profileForm.reset();
             
-            // jeśli wcześniej coś wykryliśmy AI (np. przy skanowaniu),
-            // możemy to wykorzystać jako domyślny gatunek
-            if (detectedSpeciesFromScan) {
-                profileSpeciesInput.value = detectedSpeciesFromScan;
-            } else {
-                profileSpeciesInput.value = "pies";
-            }
-            
+            // Domyślnie przyjmijmy, że to pies (użytkownik może zmienić)
+            profileSpeciesInput.value = "pies";
+            profileSexInput.value = "samica";
             profileFormAvatarPreview.textContent =
                 profileSpeciesInput.value === "kot" ? "🐱" : "🐶";
             
@@ -303,34 +307,88 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (takePetPhotoButton) {
         takePetPhotoButton.addEventListener('click', function() {
-            console.log("Kliknięto: Zrób zdjęcie zwierzaka (symulacja AI)");
+            console.log("Kliknięto: Zrób zdjęcie zwierzaka (wejście w flow)");
+            selectedPhotoSource = null;
+            photoPreviewText.textContent = "Nie wybrano jeszcze zdjęcia.";
+            photoAiStatusText.textContent = "Po wybraniu zdjęcia uruchom analizę AI.";
+            startAiAnalysisButton.disabled = true;
+            showView("photoFlowView");
+        });
+    }
+
+    if (simulateCameraShotButton) {
+        simulateCameraShotButton.addEventListener('click', function() {
+            console.log("Symulacja: zrobienie zdjęcia aparatem");
+            selectedPhotoSource = "camera";
+            photoPreviewText.textContent = "Symulacja zdjęcia z aparatu. Zdjęcie zostało wykonane.";
+            photoAiStatusText.textContent = "Zdjęcie gotowe. Możesz uruchomić analizę AI.";
+            startAiAnalysisButton.disabled = false;
+        });
+    }
+
+    if (simulateGalleryPickButton) {
+        simulateGalleryPickButton.addEventListener('click', function() {
+            console.log("Symulacja: wybór zdjęcia z galerii");
+            selectedPhotoSource = "gallery";
+            photoPreviewText.textContent = "Symulacja wyboru zdjęcia z galerii. Zdjęcie zostało wybrane.";
+            photoAiStatusText.textContent = "Zdjęcie gotowe. Możesz uruchomić analizę AI.";
+            startAiAnalysisButton.disabled = false;
+        });
+    }
+
+    if (startAiAnalysisButton) {
+        startAiAnalysisButton.addEventListener('click', function() {
+            if (!selectedPhotoSource) {
+                return;
+            }
             
-            // Symulacja wyniku AI po zrobieniu zdjęcia zwierzaka
-            const aiResult = {
-                species: "pies",      // albo "kot" – na potrzeby prototypu zostaw "pies"
-                breed: "Bokser",
-                color: "Pręgowany"
-            };
+            console.log("Rozpoczynam analizę zdjęcia (AI). Źródło:", selectedPhotoSource);
+            startAiAnalysisButton.disabled = true;
+            photoAiStatusText.textContent = "Analizuję zdjęcie za pomocą AI...";
             
-            // zapamiętujemy gatunek wykryty przez AI
-            detectedSpeciesFromScan = aiResult.species;
-            
-            // Otwieramy formularz profilu z wstępnie uzupełnionymi danymi
-            showView("profileFormView");
-            profileFormTitle.textContent = "Uzupełnij dane zwierzaka";
-            profileNameInput.value = ""; // użytkownik sam nadaje imię
-            profileSpeciesInput.value = aiResult.species;
-            profileBreedInput.value = aiResult.breed;
-            profileColorInput.value = aiResult.color;
-            
-            // pozostałe pola mogą pozostać puste / domyślne
-            profileSexInput.value = "samica";
-            profileWeightInput.value = "";
-            profileAgeInput.value = "";
-            
-            // avatar zgodny z gatunkiem
-            profileFormAvatarPreview.textContent =
-                aiResult.species === "kot" ? "🐱" : "🐶";
+            // Symulacja opóźnienia analizy AI
+            setTimeout(() => {
+                // Symulowany wynik AI
+                const aiResult = {
+                    breed: "Bokser",
+                    color: "Pręgowany"
+                };
+                
+                console.log("Wynik analizy AI:", aiResult);
+                
+                // Przygotuj formularz profilu
+                profileFormTitle.textContent = "Uzupełnij dane zwierzaka";
+                
+                // Imienia NIE uzupełniamy – użytkownik poda je ręcznie
+                profileNameInput.value = "";
+                
+                // Gatunek: pozostawiamy domyślny ("pies") lub aktualny, jeśli coś już wcześniej ustawiono
+                if (!profileSpeciesInput.value) {
+                    profileSpeciesInput.value = "pies";
+                }
+                
+                // UZUPEŁNIAMY TYLKO RASĘ I KOLOR
+                profileBreedInput.value = aiResult.breed;
+                profileColorInput.value = aiResult.color;
+                
+                // Pozostałe pola zostawiamy puste / domyślne
+                if (!profileSexInput.value) {
+                    profileSexInput.value = "samica";
+                }
+                profileWeightInput.value = "";
+                profileAgeInput.value = "";
+                
+                // Avatar – oparty na gatunku
+                profileFormAvatarPreview.textContent =
+                    profileSpeciesInput.value === "kot" ? "🐱" : "🐶";
+                
+                photoAiStatusText.textContent =
+                    "Analiza zakończona. Uzupełniono pola rasa i kolor. Uzupełnij pozostałe dane zwierzaka.";
+                startAiAnalysisButton.disabled = false;
+                
+                // Przejście do formularza profilu
+                showView("profileFormView");
+            }, 1000);
         });
     }
 

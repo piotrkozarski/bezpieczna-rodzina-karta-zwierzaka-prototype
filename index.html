@@ -49,11 +49,11 @@
                                 <h3>Brak danych zwierzaka</h3>
                                 <p>Uzupełnij dane zwierzaka powiązanego z tym trackerem, aby korzystać ze szczepień i przypomnień.</p>
                                 <div class="empty-actions">
-                                    <button class="primary-button" id="takePetPhotoButton">
-                                        Zrób zdjęcie zwierzaka
+                                    <button class="primary-button primary-large" id="takePetPhotoButton">
+                                        📷 Zrób zdjęcie zwierzaka
                                     </button>
-                                    <button class="outlined-button" id="addPetProfileButton">
-                                        Uzupełnij dane zwierzaka
+                                    <button class="text-button subtle-link" id="addPetProfileButton">
+                                        Uzupełnij dane zwierzaka ręcznie
                                     </button>
                                 </div>
                             </div>
@@ -184,6 +184,41 @@
                                 <button type="submit" class="primary-button">Zapisz</button>
                             </div>
                         </form>
+                    </div>
+
+                    <!-- WIDOK: FLOW ZDJĘCIA I ANALIZY AI -->
+                    <div class="pet-card-content hidden" id="photoFlowView">
+                        <div class="pet-form-header">
+                            <button class="icon-button" data-back-to="petCardMainView">←</button>
+                            <h3>Dodaj zdjęcie zwierzaka</h3>
+                        </div>
+                        <div class="photo-flow">
+                            <p class="photo-flow-description">
+                                Wybierz, czy chcesz zrobić zdjęcie aparatem, czy wybrać je z galerii. To tylko symulacja – nie korzystamy z prawdziwego aparatu.
+                            </p>
+                            <div class="photo-source-buttons">
+                                <button type="button" class="secondary-button" id="simulateCameraShotButton">
+                                    📷 Zrób zdjęcie aparatem
+                                </button>
+                                <button type="button" class="secondary-button" id="simulateGalleryPickButton">
+                                    🖼️ Wybierz zdjęcie z galerii
+                                </button>
+                            </div>
+                            <div class="photo-preview" id="photoPreview">
+                                <span class="photo-preview-icon">🐾</span>
+                                <p class="photo-preview-text" id="photoPreviewText">
+                                    Nie wybrano jeszcze zdjęcia.
+                                </p>
+                            </div>
+                            <div class="photo-ai-status">
+                                <p id="photoAiStatusText">
+                                    Po wybraniu zdjęcia uruchom analizę AI.
+                                </p>
+                            </div>
+                            <button type="button" class="primary-button" id="startAiAnalysisButton" disabled>
+                                Analizuj zdjęcie (AI)
+                            </button>
+                        </div>
                     </div>
 
                     <!-- WIDOK: FORMULARZ DODANIA SZCZEPIENIA -->
