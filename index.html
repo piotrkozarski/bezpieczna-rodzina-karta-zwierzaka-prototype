@@ -66,7 +66,14 @@
                                 <button class="text-button" id="editProfileButton">Edytuj</button>
                             </div>
                             <div class="pet-profile">
-                                <div class="pet-avatar" id="petAvatar">🐶</div>
+                                <div class="pet-avatar" id="petAvatar">
+                                    <img
+                                        id="petAvatarImage"
+                                        class="pet-avatar-image hidden"
+                                        alt="Zdjęcie zwierzaka"
+                                    />
+                                    <span id="petAvatarEmoji">🐶</span>
+                                </div>
                                 <div class="pet-profile-info">
                                     <div class="pet-name-row">
                                         <span class="pet-name" id="petNameDisplay">Tosia</span>
@@ -143,7 +150,7 @@
                         <form class="pet-form" id="profileForm">
                             <div class="avatar-picker">
                                 <div class="pet-avatar" id="profileFormAvatarPreview">🐶</div>
-                                <button type="button" class="text-button" id="changeAvatarButton">Zmień zdjęcie (symulacja)</button>
+                                <button type="button" class="text-button" id="changeAvatarButton">Zmień zdjęcie</button>
                             </div>
                             <label class="form-field">
                                 <span class="form-label">Imię</span>
@@ -167,6 +174,7 @@
                             <label class="form-field">
                                 <span class="form-label">Płeć</span>
                                 <select name="sex" id="profileSexInput" required>
+                                    <option value="" selected disabled hidden>Wybierz płeć</option>
                                     <option value="samica">Samica</option>
                                     <option value="samiec">Samiec</option>
                                 </select>

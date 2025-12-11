@@ -3,6 +3,7 @@ let petProfile = null; // null dopóki użytkownik nie doda profilu
 let detectedSpeciesFromScan = null; // np. "pies" po skanowaniu dokumentu
 let selectedPhotoSource = null; // "camera" | "gallery" | null
 let selectedPhotoAnalyzed = false;
+let selectedPhotoDataUrl = null; // zdjęcie obecnie wybrane w photo flow
 let vaccinations = []; // tablica obiektów: { name, type, date, nextDate }
 let reminders = []; // tablica obiektów: { kind, title, date, time }
 
@@ -37,6 +38,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const petWeightDisplay = document.getElementById('petWeightDisplay');
     const petAgeDisplay = document.getElementById('petAgeDisplay');
     const petAvatar = document.getElementById('petAvatar');
+    const petAvatarImage = document.getElementById('petAvatarImage');
+    const petAvatarEmoji = document.getElementById('petAvatarEmoji');
 
     // Profil – formularz:
     const profileForm = document.getElementById('profileForm');
@@ -130,6 +133,13 @@ document.addEventListener('DOMContentLoaded', function() {
             nextVaccinationSection.classList.add('hidden');
             remindersSection.classList.add('hidden');
             petCardSubtitle.textContent = 'Brak danych zwierzaka';
+            
+            // avatar w pustym stanie – emoji
+            if (petAvatarImage && petAvatarEmoji) {
+                petAvatarImage.classList.add('hidden');
+                petAvatarEmoji.classList.remove('hidden');
+                petAvatarEmoji.textContent = '🐾';
+            }
         } else {
             // Wypełniony profil
             petProfileEmptyState.classList.add('hidden');
@@ -138,19 +148,27 @@ document.addEventListener('DOMContentLoaded', function() {
             remindersSection.classList.remove('hidden');
 
             // Wypełnij dane
-            petNameDisplay.textContent = petProfile.name;
-            petSpeciesTag.textContent = petProfile.species === 'pies' ? 'Pies' : 'Kot';
-            petBreedDisplay.textContent = petProfile.breed || '-';
-            petColorDisplay.textContent = petProfile.color || '-';
-            petSexDisplay.textContent = petProfile.sex === 'samica' ? 'Samica' : 'Samiec';
-            petWeightDisplay.textContent = petProfile.weight ? `${petProfile.weight} kg` : '-';
-            petAgeDisplay.textContent = petProfile.age ? `${petProfile.age} lat` : '-';
-
-            // Ustaw avatar
-            petAvatar.textContent = petProfile.species === 'pies' ? '🐶' : '🐱';
+            petNameDisplay.textContent = petProfile.name || 'Bez imienia';
+            petSpeciesTag.textContent = petProfile.species === 'kot' ? 'Kot' : 'Pies';
+            petBreedDisplay.textContent = petProfile.breed || '—';
+            petColorDisplay.textContent = petProfile.color || '—';
+            petSexDisplay.textContent = petProfile.sex === 'samica' ? 'Samica' : petProfile.sex === 'samiec' ? 'Samiec' : '—';
+            petWeightDisplay.textContent = petProfile.weight ? `${petProfile.weight} kg` : '—';
+            petAgeDisplay.textContent = petProfile.age ? `${petProfile.age} lat` : '—';
 
             // Ustaw podtytuł
-            petCardSubtitle.textContent = `Profil: ${petProfile.name} (${petSpeciesTag.textContent})`;
+            petCardSubtitle.textContent = `Profil: ${petProfile.name || 'zwierzak'} (${petProfile.species === 'kot' ? 'Kot' : 'Pies'})`;
+
+            // AVATAR – zdjęcie jeśli jest, inaczej emoji
+            if (petProfile.photo && petAvatarImage && petAvatarEmoji) {
+                petAvatarImage.src = petProfile.photo;
+                petAvatarImage.classList.remove('hidden');
+                petAvatarEmoji.classList.add('hidden');
+            } else if (petAvatarImage && petAvatarEmoji) {
+                petAvatarImage.classList.add('hidden');
+                petAvatarEmoji.classList.remove('hidden');
+                petAvatarEmoji.textContent = petProfile.species === 'kot' ? '🐱' : '🐶';
+            }
         }
     }
 
@@ -302,7 +320,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Domyślnie przyjmijmy, że to pies (użytkownik może zmienić)
             profileSpeciesInput.value = "pies";
-            profileSexInput.value = "samica";
+            profileSexInput.value = "";
             profileFormAvatarPreview.textContent =
                 profileSpeciesInput.value === "kot" ? "🐱" : "🐶";
             
@@ -380,6 +398,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const reader = new FileReader();
             reader.onload = function(e) {
                 const dataUrl = e.target.result;
+                selectedPhotoDataUrl = dataUrl; // ZAPISUJEMY WYBRANE ZDJĘCIE
                 
                 if (photoPreviewImage) {
                     photoPreviewImage.src = dataUrl;
@@ -460,9 +479,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 profileColorInput.value = aiResult.color;
                 
                 // Reszta pól domyślna / pusta
-                if (!profileSexInput.value) {
-                    profileSexInput.value = "samica";
-                }
+                // pozostaw puste – użytkownik musi wybrać
+                profileSexInput.value = profileSexInput.value || "";
                 profileWeightInput.value = "";
                 profileAgeInput.value = "";
                 
@@ -486,7 +504,7 @@ document.addEventListener('DOMContentLoaded', function() {
             profileSpeciesInput.value = petProfile.species || "pies";
             profileBreedInput.value = petProfile.breed || "";
             profileColorInput.value = petProfile.color || "";
-            profileSexInput.value = petProfile.sex || "samica";
+            profileSexInput.value = petProfile.sex || "";
             profileWeightInput.value = petProfile.weight || "";
             profileAgeInput.value = petProfile.age || "";
             
@@ -511,19 +529,31 @@ document.addEventListener('DOMContentLoaded', function() {
     profileForm.addEventListener('submit', function(e) {
         e.preventDefault();
 
+        const name = profileNameInput.value.trim();
+        const species = profileSpeciesInput.value;
+        const breed = profileBreedInput.value.trim();
+        const color = profileColorInput.value.trim();
+        const sex = profileSexInput.value || "";
+        const weight = profileWeightInput.value.trim() ? parseFloat(profileWeightInput.value) : null;
+        const age = profileAgeInput.value.trim() ? parseInt(profileAgeInput.value) : null;
+        const existingPhoto = petProfile && petProfile.photo ? petProfile.photo : null;
+
         // Odczytaj wartości pól
         petProfile = {
-            name: profileNameInput.value.trim(),
-            species: profileSpeciesInput.value,
-            breed: profileBreedInput.value.trim(),
-            color: profileColorInput.value.trim(),
-            sex: profileSexInput.value,
-            weight: profileWeightInput.value.trim() ? parseFloat(profileWeightInput.value) : null,
-            age: profileAgeInput.value.trim() ? parseInt(profileAgeInput.value) : null
+            name,
+            species,
+            breed,
+            color,
+            sex,
+            weight,
+            age,
+            photo: selectedPhotoDataUrl || existingPhoto || null
         };
 
         // po zapisaniu profilu wynik AI nie jest już potrzebny
         detectedSpeciesFromScan = null;
+        // po zapisaniu profilu nie musimy trzymać tymczasowego zdjęcia
+        selectedPhotoDataUrl = null;
 
         renderProfileState();
         showView("petCardMainView");
