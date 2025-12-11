@@ -205,10 +205,23 @@
                                 </button>
                             </div>
                             <div class="photo-preview" id="photoPreview">
-                                <span class="photo-preview-icon">🐾</span>
-                                <p class="photo-preview-text" id="photoPreviewText">
-                                    Nie wybrano jeszcze zdjęcia.
-                                </p>
+                                <div class="photo-preview-image-wrapper">
+                                    <img
+                                        src=""
+                                        alt="Podgląd zdjęcia zwierzaka"
+                                        class="photo-preview-image hidden"
+                                        id="photoPreviewImage"
+                                    />
+                                    <div class="photo-preview-placeholder" id="photoPreviewPlaceholder">
+                                        <span class="photo-preview-icon">🐾</span>
+                                        <p class="photo-preview-text" id="photoPreviewText">
+                                            Nie wybrano jeszcze zdjęcia.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="photo-preview-meta">
+                                    <p id="photoPreviewMetaText">Źródło zdjęcia: brak</p>
+                                </div>
                             </div>
                             <div class="photo-ai-status">
                                 <p id="photoAiStatusText">

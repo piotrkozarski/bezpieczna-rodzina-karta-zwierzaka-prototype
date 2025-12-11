@@ -2,6 +2,7 @@
 let petProfile = null; // null dopóki użytkownik nie doda profilu
 let detectedSpeciesFromScan = null; // np. "pies" po skanowaniu dokumentu
 let selectedPhotoSource = null; // "camera" | "gallery" | null
+let selectedPhotoAnalyzed = false;
 let vaccinations = []; // tablica obiektów: { name, type, date, nextDate }
 let reminders = []; // tablica obiektów: { kind, title, date, time }
 
@@ -61,6 +62,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const startAiAnalysisButton = document.getElementById('startAiAnalysisButton');
     const photoPreviewText = document.getElementById('photoPreviewText');
     const photoAiStatusText = document.getElementById('photoAiStatusText');
+    const photoPreviewImage = document.getElementById('photoPreviewImage');
+    const photoPreviewPlaceholder = document.getElementById('photoPreviewPlaceholder');
+    const photoPreviewMetaText = document.getElementById('photoPreviewMetaText');
 
     // Historia szczepień:
     const openVaccinationHistoryButton = document.getElementById('openVaccinationHistoryButton');
@@ -309,9 +313,29 @@ document.addEventListener('DOMContentLoaded', function() {
         takePetPhotoButton.addEventListener('click', function() {
             console.log("Kliknięto: Zrób zdjęcie zwierzaka (wejście w flow)");
             selectedPhotoSource = null;
-            photoPreviewText.textContent = "Nie wybrano jeszcze zdjęcia.";
-            photoAiStatusText.textContent = "Po wybraniu zdjęcia uruchom analizę AI.";
-            startAiAnalysisButton.disabled = true;
+            selectedPhotoAnalyzed = false;
+            
+            // Reset podglądu
+            if (photoPreviewImage) {
+                photoPreviewImage.src = "";
+                photoPreviewImage.classList.add("hidden");
+            }
+            if (photoPreviewPlaceholder) {
+                photoPreviewPlaceholder.classList.remove("hidden");
+            }
+            if (photoPreviewText) {
+                photoPreviewText.textContent = "Nie wybrano jeszcze zdjęcia.";
+            }
+            if (photoPreviewMetaText) {
+                photoPreviewMetaText.textContent = "Źródło zdjęcia: brak";
+            }
+            if (photoAiStatusText) {
+                photoAiStatusText.textContent = "Po wybraniu zdjęcia uruchom analizę AI.";
+            }
+            if (startAiAnalysisButton) {
+                startAiAnalysisButton.disabled = true;
+                startAiAnalysisButton.textContent = "Analizuj zdjęcie (AI)";
+            }
             showView("photoFlowView");
         });
     }
@@ -320,9 +344,27 @@ document.addEventListener('DOMContentLoaded', function() {
         simulateCameraShotButton.addEventListener('click', function() {
             console.log("Symulacja: zrobienie zdjęcia aparatem");
             selectedPhotoSource = "camera";
-            photoPreviewText.textContent = "Symulacja zdjęcia z aparatu. Zdjęcie zostało wykonane.";
-            photoAiStatusText.textContent = "Zdjęcie gotowe. Możesz uruchomić analizę AI.";
-            startAiAnalysisButton.disabled = false;
+            selectedPhotoAnalyzed = false;
+            
+            if (photoPreviewImage) {
+                photoPreviewImage.src = "assets/dog-camera.jpg";
+                photoPreviewImage.classList.remove("hidden");
+            }
+            if (photoPreviewPlaceholder) {
+                photoPreviewPlaceholder.classList.add("hidden");
+            }
+            if (photoPreviewText) {
+                photoPreviewText.textContent = "Symulowane zdjęcie wykonane aparatem.";
+            }
+            if (photoPreviewMetaText) {
+                photoPreviewMetaText.textContent = "Źródło zdjęcia: aparat (symulacja).";
+            }
+            if (photoAiStatusText) {
+                photoAiStatusText.textContent = "Zdjęcie gotowe. Możesz uruchomić analizę AI.";
+            }
+            if (startAiAnalysisButton) {
+                startAiAnalysisButton.disabled = false;
+            }
         });
     }
 
@@ -330,9 +372,27 @@ document.addEventListener('DOMContentLoaded', function() {
         simulateGalleryPickButton.addEventListener('click', function() {
             console.log("Symulacja: wybór zdjęcia z galerii");
             selectedPhotoSource = "gallery";
-            photoPreviewText.textContent = "Symulacja wyboru zdjęcia z galerii. Zdjęcie zostało wybrane.";
-            photoAiStatusText.textContent = "Zdjęcie gotowe. Możesz uruchomić analizę AI.";
-            startAiAnalysisButton.disabled = false;
+            selectedPhotoAnalyzed = false;
+            
+            if (photoPreviewImage) {
+                photoPreviewImage.src = "assets/dog-gallery.jpg";
+                photoPreviewImage.classList.remove("hidden");
+            }
+            if (photoPreviewPlaceholder) {
+                photoPreviewPlaceholder.classList.add("hidden");
+            }
+            if (photoPreviewText) {
+                photoPreviewText.textContent = "Symulowane zdjęcie wybrane z galerii.";
+            }
+            if (photoPreviewMetaText) {
+                photoPreviewMetaText.textContent = "Źródło zdjęcia: galeria (symulacja).";
+            }
+            if (photoAiStatusText) {
+                photoAiStatusText.textContent = "Zdjęcie gotowe. Możesz uruchomić analizę AI.";
+            }
+            if (startAiAnalysisButton) {
+                startAiAnalysisButton.disabled = false;
+            }
         });
     }
 
@@ -344,25 +404,38 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.log("Rozpoczynam analizę zdjęcia (AI). Źródło:", selectedPhotoSource);
             startAiAnalysisButton.disabled = true;
-            photoAiStatusText.textContent = "Analizuję zdjęcie za pomocą AI...";
+            startAiAnalysisButton.textContent = "Analizuję...";
             
-            // Symulacja opóźnienia analizy AI
+            if (photoAiStatusText) {
+                photoAiStatusText.textContent = "Analizujemy umaszczenie i rasę zwierzaka na podstawie zdjęcia...";
+            }
+            
+            // Symulacja czasu analizy AI
             setTimeout(() => {
-                // Symulowany wynik AI
+                // Symulowany wynik AI – dla prototypu twardo wpisujemy owczarka niemieckiego
                 const aiResult = {
-                    breed: "Bokser",
-                    color: "Pręgowany"
+                    breed: "Owczarek niemiecki",
+                    color: "Czarny podpalany"
                 };
                 
+                selectedPhotoAnalyzed = true;
                 console.log("Wynik analizy AI:", aiResult);
                 
-                // Przygotuj formularz profilu
+                if (photoAiStatusText) {
+                    photoAiStatusText.textContent =
+                        "Analiza zakończona. Uzupełniono pola rasa i kolor – sprawdź i uzupełnij pozostałe dane.";
+                }
+                
+                startAiAnalysisButton.disabled = false;
+                startAiAnalysisButton.textContent = "Analizuj zdjęcie (AI)";
+                
+                // Przygotowanie formularza profilu
                 profileFormTitle.textContent = "Uzupełnij dane zwierzaka";
                 
-                // Imienia NIE uzupełniamy – użytkownik poda je ręcznie
+                // Imię zostawiamy puste – użytkownik sam je poda
                 profileNameInput.value = "";
                 
-                // Gatunek: pozostawiamy domyślny ("pies") lub aktualny, jeśli coś już wcześniej ustawiono
+                // Gatunek – jeśli nic nie ustawione, przyjmijmy psa
                 if (!profileSpeciesInput.value) {
                     profileSpeciesInput.value = "pies";
                 }
@@ -371,24 +444,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 profileBreedInput.value = aiResult.breed;
                 profileColorInput.value = aiResult.color;
                 
-                // Pozostałe pola zostawiamy puste / domyślne
+                // Pozostałe pola puste/dom.
                 if (!profileSexInput.value) {
                     profileSexInput.value = "samica";
                 }
                 profileWeightInput.value = "";
                 profileAgeInput.value = "";
                 
-                // Avatar – oparty na gatunku
+                // Avatar na podstawie gatunku
                 profileFormAvatarPreview.textContent =
                     profileSpeciesInput.value === "kot" ? "🐱" : "🐶";
                 
-                photoAiStatusText.textContent =
-                    "Analiza zakończona. Uzupełniono pola rasa i kolor. Uzupełnij pozostałe dane zwierzaka.";
-                startAiAnalysisButton.disabled = false;
-                
                 // Przejście do formularza profilu
                 showView("profileFormView");
-            }, 1000);
+            }, 1200);
         });
     }
 
