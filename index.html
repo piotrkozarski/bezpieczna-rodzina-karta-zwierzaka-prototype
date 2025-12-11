@@ -47,8 +47,15 @@
                             <div class="empty-state">
                                 <div class="empty-avatar">🐾</div>
                                 <h3>Brak danych zwierzaka</h3>
-                                <p>Dodaj podstawowe informacje o zwierzaku, aby korzystać ze szczepień i przypomnień.</p>
-                                <button class="primary-button" id="addPetProfileButton">Dodaj dane zwierzaka</button>
+                                <p>Uzupełnij dane zwierzaka powiązanego z tym trackerem, aby korzystać ze szczepień i przypomnień.</p>
+                                <div class="empty-actions">
+                                    <button class="primary-button" id="takePetPhotoButton">
+                                        Zrób zdjęcie zwierzaka
+                                    </button>
+                                    <button class="outlined-button" id="addPetProfileButton">
+                                        Uzupełnij dane zwierzaka
+                                    </button>
+                                </div>
                             </div>
                         </section>
 
@@ -131,7 +138,7 @@
                     <div class="pet-card-content hidden" id="profileFormView">
                         <div class="pet-form-header">
                             <button class="icon-button" data-back-to="petCardMainView">←</button>
-                            <h3 id="profileFormTitle">Dodaj zwierzaka</h3>
+                            <h3 id="profileFormTitle">Uzupełnij dane zwierzaka</h3>
                         </div>
                         <form class="pet-form" id="profileForm">
                             <div class="avatar-picker">

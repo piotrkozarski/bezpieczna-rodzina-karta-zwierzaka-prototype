@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Przyciski profilowe:
     const addPetProfileButton = document.getElementById('addPetProfileButton');
+    const takePetPhotoButton = document.getElementById('takePetPhotoButton');
     const editProfileButton = document.getElementById('editProfileButton');
 
     // Historia szczepień:
@@ -277,44 +278,83 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Dodawanie / edycja profilu
-    addPetProfileButton.addEventListener('click', function() {
-        profileFormTitle.textContent = 'Dodaj zwierzaka';
-        profileForm.reset();
-        
-        // Jeśli wykryto gatunek ze skanu, ustaw domyślnie
-        if (detectedSpeciesFromScan) {
-            profileSpeciesInput.value = detectedSpeciesFromScan;
-        } else {
-            profileSpeciesInput.value = 'pies'; // domyślnie
-        }
-        
-        // Ustaw domyślny avatar
-        profileFormAvatarPreview.textContent = profileSpeciesInput.value === 'pies' ? '🐶' : '🐱';
-        
-        showView('profileFormView');
-        console.log('Otworzono formularz dodawania profilu');
-    });
+    if (addPetProfileButton) {
+        addPetProfileButton.addEventListener('click', function() {
+            console.log("Kliknięto: Uzupełnij dane zwierzaka (ręcznie)");
+            profileFormTitle.textContent = "Uzupełnij dane zwierzaka";
+            
+            // czyścimy formularz
+            profileForm.reset();
+            
+            // jeśli wcześniej coś wykryliśmy AI (np. przy skanowaniu),
+            // możemy to wykorzystać jako domyślny gatunek
+            if (detectedSpeciesFromScan) {
+                profileSpeciesInput.value = detectedSpeciesFromScan;
+            } else {
+                profileSpeciesInput.value = "pies";
+            }
+            
+            profileFormAvatarPreview.textContent =
+                profileSpeciesInput.value === "kot" ? "🐱" : "🐶";
+            
+            showView("profileFormView");
+        });
+    }
 
-    editProfileButton.addEventListener('click', function() {
-        if (petProfile) {
-            profileFormTitle.textContent = 'Edytuj zwierzaka';
+    if (takePetPhotoButton) {
+        takePetPhotoButton.addEventListener('click', function() {
+            console.log("Kliknięto: Zrób zdjęcie zwierzaka (symulacja AI)");
             
-            // Wypełnij pola z petProfile
-            profileNameInput.value = petProfile.name || '';
-            profileSpeciesInput.value = petProfile.species || 'pies';
-            profileBreedInput.value = petProfile.breed || '';
-            profileColorInput.value = petProfile.color || '';
-            profileSexInput.value = petProfile.sex || 'samica';
-            profileWeightInput.value = petProfile.weight || '';
-            profileAgeInput.value = petProfile.age || '';
+            // Symulacja wyniku AI po zrobieniu zdjęcia zwierzaka
+            const aiResult = {
+                species: "pies",      // albo "kot" – na potrzeby prototypu zostaw "pies"
+                breed: "Bokser",
+                color: "Pręgowany"
+            };
             
-            // Ustaw avatar zgodnie z gatunkiem
-            profileFormAvatarPreview.textContent = petProfile.species === 'pies' ? '🐶' : '🐱';
+            // zapamiętujemy gatunek wykryty przez AI
+            detectedSpeciesFromScan = aiResult.species;
             
-            showView('profileFormView');
-            console.log('Otworzono formularz edycji profilu');
-        }
-    });
+            // Otwieramy formularz profilu z wstępnie uzupełnionymi danymi
+            showView("profileFormView");
+            profileFormTitle.textContent = "Uzupełnij dane zwierzaka";
+            profileNameInput.value = ""; // użytkownik sam nadaje imię
+            profileSpeciesInput.value = aiResult.species;
+            profileBreedInput.value = aiResult.breed;
+            profileColorInput.value = aiResult.color;
+            
+            // pozostałe pola mogą pozostać puste / domyślne
+            profileSexInput.value = "samica";
+            profileWeightInput.value = "";
+            profileAgeInput.value = "";
+            
+            // avatar zgodny z gatunkiem
+            profileFormAvatarPreview.textContent =
+                aiResult.species === "kot" ? "🐱" : "🐶";
+        });
+    }
+
+    if (editProfileButton) {
+        editProfileButton.addEventListener('click', function() {
+            if (!petProfile) return;
+            
+            console.log("Kliknięto: Edytuj dane zwierzaka");
+            profileFormTitle.textContent = "Edytuj dane zwierzaka";
+            
+            profileNameInput.value = petProfile.name || "";
+            profileSpeciesInput.value = petProfile.species || "pies";
+            profileBreedInput.value = petProfile.breed || "";
+            profileColorInput.value = petProfile.color || "";
+            profileSexInput.value = petProfile.sex || "samica";
+            profileWeightInput.value = petProfile.weight || "";
+            profileAgeInput.value = petProfile.age || "";
+            
+            profileFormAvatarPreview.textContent =
+                petProfile.species === "kot" ? "🐱" : "🐶";
+            
+            showView("profileFormView");
+        });
+    }
 
     changeAvatarButton.addEventListener('click', function() {
         // Symulacja zmiany zdjęcia - przełącz emoji
@@ -332,20 +372,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Odczytaj wartości pól
         petProfile = {
-            name: profileNameInput.value,
+            name: profileNameInput.value.trim(),
             species: profileSpeciesInput.value,
-            breed: profileBreedInput.value,
-            color: profileColorInput.value,
+            breed: profileBreedInput.value.trim(),
+            color: profileColorInput.value.trim(),
             sex: profileSexInput.value,
-            weight: profileWeightInput.value ? parseFloat(profileWeightInput.value) : null,
-            age: profileAgeInput.value ? parseInt(profileAgeInput.value) : null
+            weight: profileWeightInput.value.trim() ? parseFloat(profileWeightInput.value) : null,
+            age: profileAgeInput.value.trim() ? parseInt(profileAgeInput.value) : null
         };
 
-        // Ustaw detectedSpeciesFromScan = null (już wykorzystane)
+        // po zapisaniu profilu wynik AI nie jest już potrzebny
         detectedSpeciesFromScan = null;
 
         renderProfileState();
-        showView('petCardMainView');
+        showView("petCardMainView");
         console.log('Zapisano profil zwierzaka:', petProfile);
     });
 
